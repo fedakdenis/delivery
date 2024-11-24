@@ -7,7 +7,7 @@ namespace DeliveryApp.Core.Domain.Model.CourierAggregate;
 public class Transport : Entity<int>
 {
     public static readonly Transport Pedestrian = Create(1, "Pedestrian", 1).Value;
-    public static readonly Transport Bicycle = Create(2, "Bicycle ", 2).Value;
+    public static readonly Transport Bicycle = Create(2, "Bicycle", 2).Value;
     public static readonly Transport Car = Create(3, "Car", 3).Value;
 
     [ExcludeFromCodeCoverage]
