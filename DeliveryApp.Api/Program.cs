@@ -1,5 +1,7 @@
 using DeliveryApp.Api;
 using DeliveryApp.Core.Domain.Services;
+using DeliveryApp.Infrastructure.Adapters.Postgres;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,10 +37,10 @@ app.UseHealthChecks("/health");
 app.UseRouting();
 
 // Apply Migrations
-// using (var scope = app.Services.CreateScope())
-// {
-//     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-//     db.Database.Migrate();
-// }
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    db.Database.Migrate();
+}
 
 app.Run();
