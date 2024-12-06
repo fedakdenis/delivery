@@ -21,6 +21,8 @@ public class OrderEntityTypeConfiguration : IEntityTypeConfiguration<Order>
             c.Property(l => l.Y).HasColumnName("location_y").IsRequired();
         });
 
+        builder.Property(e => e.CourierId).HasColumnName("courier_id").ValueGeneratedNever();
+
         builder.HasOne<Courier>()
             .WithMany()
             .IsRequired(false)
@@ -29,6 +31,6 @@ public class OrderEntityTypeConfiguration : IEntityTypeConfiguration<Order>
         builder.HasOne(e => e.Status)
             .WithMany()
             .IsRequired(true)
-            .HasForeignKey();
+            .HasForeignKey("status_id");
     }
 }

@@ -14,6 +14,8 @@ public class CourierEntityTypeConfiguration : IEntityTypeConfiguration<Courier>
 
         builder.Property(e => e.Id).HasColumnName("id").ValueGeneratedNever();
 
+        builder.Property(e => e.Name).HasColumnName("name").IsRequired();
+
         builder.OwnsOne(e => e.Location, c =>
         {
             c.Property(l => l.X).HasColumnName("location_x").IsRequired();
@@ -23,11 +25,11 @@ public class CourierEntityTypeConfiguration : IEntityTypeConfiguration<Courier>
         builder.HasOne(e => e.Transport)
             .WithMany()
             .IsRequired(true)
-            .HasForeignKey();
+            .HasForeignKey("transport_id");
 
         builder.HasOne(e => e.Status)
             .WithMany()
             .IsRequired(true)
-            .HasForeignKey();
+            .HasForeignKey("status_id");
     }
 }

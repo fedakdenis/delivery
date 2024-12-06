@@ -21,6 +21,9 @@ public class ApplicationDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
+        modelBuilder.ApplyConfiguration(new OrderStatusEntityTypeConfiguration());
+        modelBuilder.ApplyConfiguration(new CourierStatusEntityTypeConfiguration());
+        modelBuilder.ApplyConfiguration(new TransportEntityTypeConfiguration());
         modelBuilder.ApplyConfiguration(new OrderEntityTypeConfiguration());
         modelBuilder.ApplyConfiguration(new CourierEntityTypeConfiguration());
     }

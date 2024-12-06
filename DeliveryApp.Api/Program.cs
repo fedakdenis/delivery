@@ -23,6 +23,9 @@ builder.Services.ConfigureOptions<SettingsSetup>();
 var connectionString = builder.Configuration["CONNECTION_STRING"];
 
 builder.Services.AddSingleton<IDispatchService, DispatchService>();
+builder.Services.AddDbContext<ApplicationDbContext>(builder => {
+    builder.UseNpgsql();
+});
 
 var app = builder.Build();
 

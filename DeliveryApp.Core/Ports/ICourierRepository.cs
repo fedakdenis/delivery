@@ -9,7 +9,7 @@ public interface ICourierRepository: IRepository<Courier>
     /// <summary>
     /// Добавить курьера
     /// </summary>
-    UnitResult<Error> Add(Courier courier);
+    Task<UnitResult<Error>> AddAsync(Courier courier);
     /// <summary>
     /// Обновить курьера
     /// </summary>
@@ -17,9 +17,9 @@ public interface ICourierRepository: IRepository<Courier>
     /// <summary>
     /// Получить курьера по идентификатору
     /// </summary>
-    Result<Courier, Error> GetById(Guid courierId);
+    Task<Result<Courier, Error>> GetByIdAsync(Guid courierId);
     /// <summary>
     /// Получить всех свободных курьеров (курьеры со статусом "Ready")
     /// </summary>
-    Result<IReadOnlyList<Courier>, Error> GetReady();
+    Result<IReadOnlyCollection<Courier>, Error> GetFree();
 }
