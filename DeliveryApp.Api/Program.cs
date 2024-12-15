@@ -26,6 +26,9 @@ builder.Services.AddSingleton<IDispatchService, DispatchService>();
 builder.Services.AddDbContext<ApplicationDbContext>(builder => {
     builder.UseNpgsql();
 });
+builder.Services.AddMediatR(configuration => {
+    configuration.RegisterServicesFromAssemblyContaining<DeliveryApp.Core.AssemblyAnchor>();
+});
 
 var app = builder.Build();
 
