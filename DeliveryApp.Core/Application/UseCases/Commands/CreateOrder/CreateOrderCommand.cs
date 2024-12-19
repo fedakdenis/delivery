@@ -4,6 +4,12 @@ namespace DeliveryApp.Core.Application.UseCases.Commands.CreateOrder;
 
 public class CreateOrderCommand : IRequest<bool>
 {
+    public CreateOrderCommand(Guid basketId, string street)
+    {
+        BasketId = basketId;
+        Street = street;
+    }
+
     /// <summary>
     /// Идентификатор корзины
     /// </summary>
