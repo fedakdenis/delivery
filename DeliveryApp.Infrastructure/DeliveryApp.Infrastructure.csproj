@@ -38,5 +38,12 @@
         <None Remove="Adapters\Kafka\BasketConfirmed\Contract.proto"/>
         <None Remove="Adapters\Grpc\GeoService\Contract.proto"/>
     </ItemGroup>
+    
+    <ItemGroup>
+        <None Remove="Adapters\Grpc\GeoService\grpc.proto" />
+        <Protobuf Include="Adapters\Grpc\GeoService\grpc.proto">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Protobuf>
+    </ItemGroup>
 
 </Project>

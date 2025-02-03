@@ -2,6 +2,7 @@ using System.Reflection;
 using DeliveryApp.Api;
 using DeliveryApp.Core.Domain.Services;
 using DeliveryApp.Core.Ports;
+using DeliveryApp.Infrastructure.Adapters.Grpc.GeoService;
 using DeliveryApp.Infrastructure.Adapters.Postgres;
 using DeliveryApp.Infrastructure.Adapters.Postgres.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -105,6 +106,10 @@ app.UseSwagger(c => { c.RouteTemplate = "openapi/{documentName}/openapi.json"; }
         options.RoutePrefix = string.Empty;
         options.SwaggerEndpoint("/openapi-original.json", "Swagger Basket Service");
     });
+
+// gRPC
+builder.Services.AddScoped<IGeoClient, GeoClient>();
+
 
 app.UseCors();
 app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
