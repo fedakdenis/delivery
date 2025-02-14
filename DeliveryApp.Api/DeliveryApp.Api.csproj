@@ -47,6 +47,9 @@
     </ItemGroup>
     <ItemGroup>
         <None Remove="Adapters\Kafka\BasketConfirmed\Contract.proto"/>
+        <Protobuf Include="Adapters\Kafka\BasketConfirmed\Contract.proto">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Protobuf>
     </ItemGroup>
     <ItemGroup>
         <_ContentIncludedByDefault Remove="Adapters\Http\Contract\src\DeliveryApp.Api.Adapters.Http.Contract.src.OpenApi\appsettings.json"/>

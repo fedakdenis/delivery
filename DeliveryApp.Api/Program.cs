@@ -1,5 +1,6 @@
 using System.Reflection;
 using DeliveryApp.Api;
+using DeliveryApp.Api.Adapters.Kafka.BasketConfirmed;
 using DeliveryApp.Core.Domain.Services;
 using DeliveryApp.Core.Ports;
 using DeliveryApp.Infrastructure.Adapters.Grpc.GeoService;
@@ -65,6 +66,15 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddSwaggerGenNewtonsoftSupport();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddControllers();
+// gRPC
+builder.Services.AddScoped<IGeoClient, GeoClient>();
+// Message Broker Consumer
+builder.Services.Configure<HostOptions>(options =>
+{
+    options.BackgroundServiceExceptionBehavior = BackgroundServiceExceptionBehavior.Ignore;
+    options.ShutdownTimeout = TimeSpan.FromSeconds(30);
+});
+builder.Services.AddHostedService<ConsumerService>();
 
 
 
@@ -107,8 +117,6 @@ app.UseSwagger(c => { c.RouteTemplate = "openapi/{documentName}/openapi.json"; }
         options.SwaggerEndpoint("/openapi-original.json", "Swagger Basket Service");
     });
 
-// gRPC
-builder.Services.AddScoped<IGeoClient, GeoClient>();
 
 
 app.UseCors();
