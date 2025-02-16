@@ -30,12 +30,13 @@ public class MoveCourierCommandHandler : IRequestHandler<MoveCourierCommand, boo
                 var courierId = order.CourierId.Value;
                 var courier = await _courierRepository.GetByIdAsync(courierId);
                 courier.Value.DoStep(order.Location);
-
                 if (order.Location == courier.Value.Location)
                 {
                     courier.Value.Free();
                     order.Complete();
+                    _orderRepository.Update(order);
                 }
+                _courierRepository.Update(courier.Value);
             }
 
             await _unitOfWork.SaveChangesAsync();
