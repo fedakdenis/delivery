@@ -10,18 +10,17 @@ namespace DeliveryApp.Api.Adapters.Kafka.BasketConfirmed;
 
 public class ConsumerService : BackgroundService
 {
-    private readonly IMediator _mediator;
-    private readonly IServiceScope _scope;
     private readonly IConsumer<Ignore, string> _consumer;
     private readonly string _topic;
+    private readonly IServiceScopeFactory _serviceScopeFactory;
 
     public ConsumerService(IServiceScopeFactory serviceScopeFactory, IOptions<Settings> settings)
     {
-        _scope = serviceScopeFactory.CreateScope();
-        _mediator = _scope.ServiceProvider.GetRequiredService<IMediator>();
+        if (serviceScopeFactory == null) throw new ArgumentNullException(nameof(serviceScopeFactory));
         if (string.IsNullOrWhiteSpace(settings.Value.MessageBrokerHost)) throw new ArgumentException(nameof(settings.Value.MessageBrokerHost));
         if (string.IsNullOrWhiteSpace(settings.Value.BasketConfirmedTopic)) throw new ArgumentException(nameof(settings.Value.BasketConfirmedTopic));
 
+        _serviceScopeFactory = serviceScopeFactory;
         var consumerConfig = new ConsumerConfig
         {
             BootstrapServers = settings.Value.MessageBrokerHost,
@@ -56,8 +55,12 @@ public class ConsumerService : BackgroundService
                     Guid.Parse(basketConfirmedIntegrationEvent.BasketId),
                     basketConfirmedIntegrationEvent.Address.Street);
 
-                var response = await _mediator.Send(createOrderCommand, cancellationToken);
-                if (!response) Console.WriteLine("Error");
+                using (var scope = _serviceScopeFactory.CreateScope())
+                {
+                    var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+                    var response = await mediator.Send(createOrderCommand, cancellationToken);
+                    if (!response) Console.WriteLine("Error");
+                }
 
                 try
                 {
@@ -73,11 +76,5 @@ public class ConsumerService : BackgroundService
         {
             _consumer.Close();
         }
-    }
-
-    public override void Dispose()
-    {
-        base.Dispose();
-        _scope.Dispose();
     }
 }
