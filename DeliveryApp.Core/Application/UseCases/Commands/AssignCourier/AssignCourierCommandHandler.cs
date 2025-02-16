@@ -31,7 +31,7 @@ public class AssignCourierCommandHandler : IRequestHandler<AssignCourierCommand,
 
         var freeCouriers = _courierRepository.GetFree();
         var fastestCourier = freeCouriers.Value
-            .OrderBy(c => c.GetStepCount(orderToAssign.Location))
+            .OrderBy(c => c.GetStepCount(orderToAssign.Location).Value)
             .FirstOrDefault();
         if (fastestCourier == null)
         {
@@ -43,12 +43,14 @@ public class AssignCourierCommandHandler : IRequestHandler<AssignCourierCommand,
         {
             throw new InvalidOperationException(assignResult.Error.Message);
         }
+        _orderRepository.Update(orderToAssign);
 
         var busyResult = fastestCourier.Busy();
         if (busyResult.IsFailure)
         {
             throw new InvalidOperationException(busyResult.Error.Message);
         }
+        _courierRepository.Update(fastestCourier);
 
         await _unitOfWork.SaveChangesAsync();
         return true;

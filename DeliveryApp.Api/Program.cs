@@ -1,5 +1,6 @@
 using System.Reflection;
 using DeliveryApp.Api;
+using DeliveryApp.Api.Adapters.BackgroundJobs;
 using DeliveryApp.Api.Adapters.Kafka.BasketConfirmed;
 using DeliveryApp.Core.Domain.Services;
 using DeliveryApp.Core.Ports;
@@ -11,6 +12,7 @@ using Microsoft.OpenApi.Models;
 using OpenApi.Filters;
 using OpenApi.OpenApi;
 using Primitives;
+using Quartz;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -75,7 +77,27 @@ builder.Services.Configure<HostOptions>(options =>
     options.ShutdownTimeout = TimeSpan.FromSeconds(30);
 });
 builder.Services.AddHostedService<ConsumerService>();
-
+// CRON Jobs
+builder.Services.AddQuartz(configure =>
+{
+    var assignOrdersJobKey = new JobKey(nameof(AssignOrdersJob));
+    var moveCouriersJobKey = new JobKey(nameof(MoveCouriersJob));
+    configure
+        .AddJob<AssignOrdersJob>(assignOrdersJobKey)
+        .AddTrigger(
+            trigger => trigger.ForJob(assignOrdersJobKey)
+                .WithSimpleSchedule(
+                    schedule => schedule.WithIntervalInSeconds(1)
+                        .RepeatForever()))
+        .AddJob<MoveCouriersJob>(moveCouriersJobKey)
+        .AddTrigger(
+            trigger => trigger.ForJob(moveCouriersJobKey)
+                .WithSimpleSchedule(
+                    schedule => schedule.WithIntervalInSeconds(2)
+                        .RepeatForever()));
+    configure.UseMicrosoftDependencyInjectionJobFactory();
+});
+builder.Services.AddQuartzHostedService();
 
 
 var app = builder.Build();

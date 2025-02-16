@@ -62,8 +62,8 @@ public class DeliveryController : DefaultApiController
                 X = o.Location.X, 
                 Y = o.Location.Y
             }
-        });
+        }).ToList();
 
-        return Ok(result);
+        return Ok(model);
     }
 }
