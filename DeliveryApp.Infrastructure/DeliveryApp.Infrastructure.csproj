@@ -45,5 +45,12 @@
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </Protobuf>
     </ItemGroup>
+    
+    <ItemGroup>
+        <None Remove="Adapters\Kafka\OrderStatusChanged\Contract.proto" />
+        <Protobuf Include="Adapters\Kafka\OrderStatusChanged\Contract.proto">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Protobuf>
+    </ItemGroup>
 
 </Project>
