@@ -45,6 +45,7 @@ public class Order : Aggregate
 
         CourierId = courierId;
         Status = OrderStatus.Assigned;
+        RaiseDomainEvent(new OrderStatusChangedDomainEvent(Id, Status));
         return new object();
     }
 
@@ -56,6 +57,7 @@ public class Order : Aggregate
         }
 
         Status = OrderStatus.Completed;
+        RaiseDomainEvent(new OrderStatusChangedDomainEvent(Id, Status));
         return new object();
     }
 

@@ -5,6 +5,7 @@ using DeliveryApp.Api.Adapters.Kafka.BasketConfirmed;
 using DeliveryApp.Core.Domain.Services;
 using DeliveryApp.Core.Ports;
 using DeliveryApp.Infrastructure.Adapters.Grpc.GeoService;
+using DeliveryApp.Infrastructure.Adapters.Kafka.OrderStatusChanged1;
 using DeliveryApp.Infrastructure.Adapters.Postgres;
 using DeliveryApp.Infrastructure.Adapters.Postgres.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -32,6 +33,8 @@ builder.Services.AddCors(options =>
 // Configuration
 builder.Services.ConfigureOptions<SettingsSetup>();
 var connectionString = builder.Configuration["CONNECTION_STRING"];
+var messageBrokerHost = builder.Configuration["MESSAGE_BROKER_HOST"];
+var orderStatusChangedTopic = builder.Configuration["ORDER_STATUS_CHANGED_TOPIC"];
 
 builder.Services.AddSingleton<IDispatchService, DispatchService>();
 builder.Services.AddDbContext<ApplicationDbContext>(builder => {
@@ -77,6 +80,8 @@ builder.Services.Configure<HostOptions>(options =>
     options.ShutdownTimeout = TimeSpan.FromSeconds(30);
 });
 builder.Services.AddHostedService<ConsumerService>();
+// Message Broker Producer
+builder.Services.AddScoped<IMessageBusProducer>(_ => new MessageBusProducer(messageBrokerHost, orderStatusChangedTopic));
 // CRON Jobs
 builder.Services.AddQuartz(configure =>
 {
