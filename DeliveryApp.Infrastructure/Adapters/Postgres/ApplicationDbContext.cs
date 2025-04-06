@@ -1,5 +1,6 @@
 using DeliveryApp.Core.Domain.Model.CourierAggregate;
 using DeliveryApp.Core.Domain.Model.OrderAggregate;
+using DeliveryApp.Infrastructure.Adapters.Postgres.Entities;
 using DeliveryApp.Infrastructure.Postgres.EntityConfiguration;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,6 +18,8 @@ public class ApplicationDbContext : DbContext
 
     public DbSet<Courier> Couriers { get; set; }
 
+    public DbSet<OutboxMessage> OutboxMessages { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -26,5 +29,6 @@ public class ApplicationDbContext : DbContext
         modelBuilder.ApplyConfiguration(new TransportEntityTypeConfiguration());
         modelBuilder.ApplyConfiguration(new OrderEntityTypeConfiguration());
         modelBuilder.ApplyConfiguration(new CourierEntityTypeConfiguration());
+        modelBuilder.ApplyConfiguration(new OutboxEntityTypeConfiguration());
     }
 }

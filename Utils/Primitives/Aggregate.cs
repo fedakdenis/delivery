@@ -30,4 +30,9 @@ public abstract class Aggregate : Entity<Guid>, IAggregateRoot
     }
 }
 
-public interface IAggregateRoot;
+public interface IAggregateRoot
+{
+    public IReadOnlyCollection<DomainEvent> GetDomainEvents();
+
+    public void ClearDomainEvents();
+}
