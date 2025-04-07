@@ -1,4 +1,5 @@
-using MediatR;
+using DeliveryApp.Infrastructure.Adapters.Postgres.Entities;
+using Newtonsoft.Json;
 using Primitives;
 
 namespace DeliveryApp.Infrastructure.Adapters.Postgres;
@@ -6,41 +7,56 @@ namespace DeliveryApp.Infrastructure.Adapters.Postgres;
 public class UnitOfWork : IUnitOfWork
 {
     private readonly ApplicationDbContext _dbContext;
-    private readonly IMediator _mediator;
 
-    public UnitOfWork(ApplicationDbContext dbContext, IMediator mediator)
+    private bool _disposed;
+
+    public UnitOfWork(ApplicationDbContext dbContext)
     {
         _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
-        _mediator = mediator;
     }
 
     public async Task<bool> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
+        await SaveDomainEventsInOutboxMessagesAsync();
         await _dbContext.SaveChangesAsync(cancellationToken);
-        await PublishDomainEventsAsync();
         return true;
     }
-    
 
-    private async Task PublishDomainEventsAsync()
+
+    private async Task SaveDomainEventsInOutboxMessagesAsync()
     {
-        var domainEntities = _dbContext.ChangeTracker
-            .Entries<Aggregate>()
-            .Where(a => a.Entity.GetDomainEvents().Any())
+        var outboxMessages = _dbContext.ChangeTracker
+            .Entries<IAggregateRoot>() // Получили агрегаты в которых есть доменные события
+            .Select(x => x.Entity)
+            .SelectMany(aggregate =>
+                {
+                    // Переложили в отдельную переменную
+                    var domainEvents = aggregate.GetDomainEvents();
+
+                    // Очистили Domain Event в самих агрегатах (поскольку далее они будут отправлены и больше не нужны)
+                    aggregate.ClearDomainEvents();
+                    return domainEvents;
+                }
+            )
+            .Select(domainEvent => new OutboxMessage
+            {
+                // Создали объект OutboxMessage на основе Domain Event
+                Id = domainEvent.EventId,
+                OccurredOnUtc = DateTime.UtcNow,
+                Type = domainEvent.GetType().Name,
+                Content = JsonConvert.SerializeObject(
+                    domainEvent,
+                    new JsonSerializerSettings
+                    {
+                        // Эта настройка нужна, чтобы сериализовать Domain Event с указанием типов
+                        // Если ее не указать, то десеарилизатор не поймет в какой тип восстанавоивать сообщение
+                        TypeNameHandling = TypeNameHandling.All
+                    })
+            })
             .ToList();
 
-        var domainEvents = domainEntities
-            .SelectMany(a => a.Entity.GetDomainEvents())
-            .ToList();
-
-        foreach (var domainEntity in domainEntities)
-        {
-            domainEntity.Entity.ClearDomainEvents();
-        }
-        
-        foreach (var domainEvent in domainEvents)
-        {
-            await _mediator.Publish(domainEvent);
-        }
-    } 
+        // Добавяляем OutboxMessages в dbContext
+        // После выполнения этой строки в DbContext будут находится сам Aggregate и OutboxMessages
+        await _dbContext.Set<OutboxMessage>().AddRangeAsync(outboxMessages);
+    }
 }
